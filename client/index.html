@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="js">
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>THT Token</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script type="text/javascript" src="https://unpkg.com/web3@1.7.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">THT</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarText">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a id="buy-tokens" style="display: none;" class="nav-link" href="#" data-toggle="modal" data-target="#modal-buy-token">Buy Token</a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="btn-disconnect" style="display: none;" class="nav-link" href="#">Disconnect Wallet</a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="btn-connect" style="display: none;" class="nav-link" href="#">Connect Wallet</a>
+                            </li>
+                        </ul>
+                        <span class="navbar-text" id="token-balance-container" style="display: none;">
+                            Your balance: <span id="token-balance">0 THT</span> | Locked balance <span id="locked-balance">0 THT</span>
+                        </span>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="col">
+            <div class="card text-center" id="token-sold-container" style="display: none;">
+                <div class="card-body">
+                    <h5 class="card-title" id="token-sold">0 THT</h5>
+                    <p class="card-text">Total THT Sold</p>
+
+                    <a href="#" id="btn-finalize" style="display: none;" class="btn btn-primary">Finalize SEED</a>
+
+                </div>
+            </div>
+            <div class="alerts">
+                <div class="alert alert-danger" id="chain-error" style="display: none;">
+                </div>
+                <div class="alert alert-success" id="approvalEventEmitted" style="display: none;">
+                    alert
+                </div>
+                <div class="alert alert-success" id="TransferEventEmitted" style="display: none;">
+                    alert
+                </div>
+                <div class="alert alert-success" id="finalEventEmitted" style="display: none;">
+                    alert
+                </div>
+                <div class="alert alert-success" id="purchaceEventEmitted" style="display: none;">
+                    alert
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-buy-token" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <a href="#" class="modal-close" data-dismiss="modal" aria-label="Close"><em class="ti ti-close"></em></a>
+                    <div class="modal-body p-md-4 p-lg-5">
+                        <h3 class="title title-md">Buy the THT Token</h3>
+                        <form>
+                            <div class="input-group mb-3">
+                                <input type="number" min="1" id="amountId" class="form-control" placeholder="" aria-label="Price" aria-describedby="basic-addon2">
+                                <div class="input-group-append">
+                                    <span class="input-group-text" id="basic-addon2">THT</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-rg btn-round btn-primary" onclick="buyToken();">Confirm purchase</button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/jquery.bundle.js"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/web3modal@1.9.4/dist/index.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.7.0/dist/umd/index.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+</body>
+
+</html>

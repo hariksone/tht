@@ -137,11 +137,15 @@ contract ThtVesting is Pausable, Ownable {
         return orders[msg.sender].length;
     }
 
-    function getOrdersCountTwo() public returns(uint256) {
-        return orders[msg.sender].length;
+    function getLockedTokensCount() public view returns(uint256) {
+        uint256 tokensCount = 0;
+        for (uint i=0; i<orders[msg.sender].length; i++) {
+            if(!orders[msg.sender][i].claimed)
+                tokensCount+=orders[msg.sender][i].amount;
+        }
+        return tokensCount;
     }
 
-    //allow owner to finalize the presale once the presale is ended
     function finalize() public onlyOwner {
         require(!isFinalized);
         require(hasEnded());
