@@ -17,8 +17,8 @@ async function buyToken() {
 }
 
 var user;
-var tokenAddress = "0xBb596D48288C33c7A7466dCFdeB267e80B1C9842";
-var contractAddress = "0xB57B9E81e1fBE982c3e323689065eE9D8eA2daf7";
+var tokenAddress = "0x549Ac242f1501D980E600192FaC386C2068D0556";
+var contractAddress = "0xF03737C3F82207a55aD4B1CfBaa2cBE194CEa2ec";
 var accounts;
 var walletDisconnect;
 var tokenSymbol;
@@ -142,6 +142,19 @@ async function fetchAccountData() {
         if(claimableBalance > 0)
             $("#claim-tokens").show();
 
+        $("#wallet_account").text('('+user+')');
+
+        let isAvailable = await contractInstance.methods.isTokenAvailable(user).call();
+        if(!isAvailable) {
+            $("#buy-tokens").hide();
+            $("#not-available").show();
+        }
+        let contractOwner = await contractInstance.methods.owner().call()
+        if (user === contractOwner) {
+            $("#add-whitelist").show();
+            $("#not-available").hide();
+        }
+
     } else {
         onDisconnect()
     }
@@ -219,6 +232,32 @@ async function claimTokens() {
             console.log(txHash);
         }
     })
+}
+
+async function addAddress() {
+    var token_to_add = $("#customerAddress").val();
+    if(token_to_add) {
+        contractInstance.methods.addWhiteListToken(token_to_add).send({}, function (err, txHash) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(txHash);
+            }
+        })
+    }
+}
+
+async function removeAddress() {
+    var token_to_remove = $("#customerAddressRemove").val();
+    if(token_to_remove) {
+        contractInstance.methods.removeWhiteListToken(token_to_remove).send({}, function (err, txHash) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(txHash);
+            }
+        })
+    }
 }
 
 window.addEventListener('load', async() => {

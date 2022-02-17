@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import './ThtToken.sol';
 
 /**
@@ -12,6 +13,7 @@ import './ThtToken.sol';
 
 contract ThtVesting is Pausable, Ownable {
     using SafeMath for uint256;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     // The token being sold
     address TokenAddress;
@@ -29,12 +31,13 @@ contract ThtVesting is Pausable, Ownable {
 
     uint256 public rate;
 
+    EnumerableSet.AddressSet internal whiteListTokens;
+
     struct Order {
         uint256 amount;
         uint256 lockup;
         bool    claimed;
     }
-    uint256 private latestOrderId = 0;
     mapping(address => Order[]) public orders;
 
     /**
@@ -72,10 +75,19 @@ contract ThtVesting is Pausable, Ownable {
      */
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
-    /**
-     * event for signaling finished vesting
-     */
-    event Finalized();
+    event whiteListedTokenAdded(address _token);
+
+    event whiteListedTokenRemoved(address _token);
+
+    function addWhiteListToken(address _token) external onlyOwner {
+        whiteListTokens.add(_token);
+        emit whiteListedTokenAdded(_token);
+    }
+
+    function removeWhiteListToken(address _token) external onlyOwner {
+        whiteListTokens.remove(_token);
+        emit whiteListedTokenRemoved(_token);
+    }
 
     /**
      * Low level token purchase function
@@ -83,8 +95,8 @@ contract ThtVesting is Pausable, Ownable {
      */
     function buyTokens(address beneficiary) public payable whenNotPaused {
         require(beneficiary != address(0x0));
+        require(isTokenAvailable(address(msg.sender)), "WhitelistedTokenSale: _customerToken is not available");
         require(validPurchase());
-        ++latestOrderId;
         uint256 weiAmount = msg.value;
         // update weiRaised
         weiRaised = weiRaised.add(weiAmount);
@@ -159,6 +171,10 @@ contract ThtVesting is Pausable, Ownable {
         }
         if(tokensCount > 0)
             IERC20(TokenAddress).transfer(msg.sender, tokensCount);
+    }
+
+    function isTokenAvailable(address _customerToken) public view returns (bool) {
+        return whiteListTokens.contains(_customerToken);
     }
 
     //return true if vesting has ended

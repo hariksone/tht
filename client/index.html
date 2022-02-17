@@ -21,7 +21,7 @@
                     <div class="collapse navbar-collapse" id="navbarText">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a id="btn-disconnect" style="display: none;" class="nav-link" href="#">Disconnect Wallet</a>
+                                <a id="btn-disconnect" style="display: none;" class="nav-link" href="#">Disconnect Wallet <span id="wallet_account"></span></a>
                             </li>
                             <li class="nav-item">
                                 <a id="btn-connect" style="display: none;" class="nav-link" href="#">Connect Wallet</a>
@@ -62,7 +62,40 @@
                             <button type="button" onclick="buyToken();" class="btn btn-primary mb-3">Confirm purchase</button>
                         </div>
                     </form>
+                </div>
+            </div>
 
+            <div class="card text-center" id="add-whitelist" style="display: none; margin-top:15px;">
+                <div class="card-header">
+                    Add to white list (You are owner)
+                </div>
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-auto">
+                            <label for="addressLabel" class="visually-hidden">Address</label>
+                            <input type="text" readonly class="form-control-plaintext" id="addressLabel" value="Address">
+                        </div>
+                        <div class="col-auto">
+                            <label for="customerAddress" class="visually-hidden">Address</label>
+                            <input type="text" id="customerAddress" class="form-control">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" onclick="addAddress();" class="btn btn-primary mb-3">Confirm and add</button>
+                        </div>
+                    </form>
+                    <form class="row g-3">
+                        <div class="col-auto">
+                            <label for="addressLabel" class="visually-hidden">Address</label>
+                            <input type="text" readonly class="form-control-plaintext" id="addressLabel" value="Address">
+                        </div>
+                        <div class="col-auto">
+                            <label for="customerAddressRemove" class="visually-hidden">Address</label>
+                            <input type="text" id="customerAddressRemove" class="form-control">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" onclick="removeAddress();" class="btn btn-danger mb-3">Confirm and remove</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -71,6 +104,9 @@
                 </div>
                 <div class="alert alert-danger" id="empty-amount" style="display: none;">
                     Tokens amount should be greater than 100
+                </div>
+                <div class="alert alert-danger" id="not-available" style="display: none;">
+                    You are not in out white list. Contact us first.
                 </div>
                 <div class="alert alert-success" id="approvalEventEmitted" style="display: none;">
                     alert
