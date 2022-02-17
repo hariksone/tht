@@ -29,12 +29,6 @@ contract ThtVesting is Pausable, Ownable {
 
     uint256 public rate;
 
-    bool public isFinalized;
-
-    uint256 public sold;
-
-    uint256 lockup = block.timestamp + 60 days;
-
     struct Order {
         uint256 amount;
         uint256 lockup;
@@ -51,21 +45,6 @@ contract ThtVesting is Pausable, Ownable {
      * @param _cap above which the vesting is closed
      * @param _rate is the amounts of tokens given for 1 ether
      */
-
-    /**
-     * event for token purchase logging
-     * @param purchaser who paid for the tokens
-     * @param beneficiary who got the tokens
-     * @param value weis paid for purchase
-     * @param amount amount of tokens purchased
-     */
-    event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
-
-    /**
-     * event for signaling finished vesting
-     */
-    event Finalized();
-
     constructor(
         address _tokenAddress,
         address payable _wallet,
@@ -85,6 +64,20 @@ contract ThtVesting is Pausable, Ownable {
     }
 
     /**
+     * event for token purchase logging
+     * @param purchaser who paid for the tokens
+     * @param beneficiary who got the tokens
+     * @param value weis paid for purchase
+     * @param amount amount of tokens purchased
+     */
+    event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
+
+    /**
+     * event for signaling finished vesting
+     */
+    event Finalized();
+
+    /**
      * Low level token purchase function
      * @param beneficiary will receive the tokens.
      */
@@ -99,22 +92,24 @@ contract ThtVesting is Pausable, Ownable {
         uint256 tokens = weiAmount.mul(rate);
 
         uint256 tokensToSend = tokens.div(10); // Send 10 percent;
-        uint256 tokensToLock = tokens.sub(tokens.div(10)); // Lock 90 percent;
-
-        Order memory currentOrder;
-
-        currentOrder.amount = tokensToLock;
-        currentOrder.lockup = lockup;
-        currentOrder.claimed = false;
-
-        orders[msg.sender].push(currentOrder);
-
-        sold += tokens;
-
+        uint256 tokensToLock = tokens.sub(tokens.div(10)).div(16); // Lock 90 percent;
+        uint lockTime = block.timestamp + 60 days;
+        // Create first lock for 60 days
+        Order memory firstOrder;
+        firstOrder.amount = tokensToLock;
+        firstOrder.lockup = lockTime;
+        firstOrder.claimed = false;
+        orders[msg.sender].push(firstOrder);
+        for(uint i=0; i<15; i++) {
+            lockTime = lockTime + 30 days;
+            Order memory newOrder;
+            newOrder.amount = tokensToLock;
+            newOrder.lockup = lockTime;
+            newOrder.claimed = false;
+            orders[msg.sender].push(newOrder);
+        }
         IERC20(TokenAddress).transfer(msg.sender, tokensToSend);
-
-        //emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-
+        emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
         forwardFunds();
     }
 
@@ -125,7 +120,6 @@ contract ThtVesting is Pausable, Ownable {
 
     // return true if the transaction can buy tokens
     function validPurchase() internal view returns (bool) {
-
         uint256 weiAmount = weiRaised.add(msg.value);
         bool notSmallAmount = msg.value >= minInvestment;
         bool withinCap = weiAmount.mul(rate) <= cap;
@@ -146,13 +140,25 @@ contract ThtVesting is Pausable, Ownable {
         return tokensCount;
     }
 
-    function finalize() public onlyOwner {
-        require(!isFinalized);
-        require(hasEnded());
+    function getClaimableTokensCount() public view returns(uint256) {
+        uint256 tokensCount = 0;
+        for (uint i=0; i<orders[msg.sender].length; i++) {
+            if(!orders[msg.sender][i].claimed && orders[msg.sender][i].lockup <= block.timestamp)
+                tokensCount+=orders[msg.sender][i].amount;
+        }
+        return tokensCount;
+    }
 
-        emit Finalized();
-
-        isFinalized = true;
+    function claimTokens() public {
+        uint256 tokensCount = 0;
+        for (uint i=0; i<orders[msg.sender].length; i++) {
+            if(!orders[msg.sender][i].claimed && orders[msg.sender][i].lockup <= block.timestamp) {
+                tokensCount+=orders[msg.sender][i].amount;
+                orders[msg.sender][i].claimed = true;
+            }
+        }
+        if(tokensCount > 0)
+            IERC20(TokenAddress).transfer(msg.sender, tokensCount);
     }
 
     //return true if vesting has ended

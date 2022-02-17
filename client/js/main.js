@@ -1,18 +1,24 @@
 async function buyToken() {
-    var amount = document.getElementById("amountId").value*0.0001;
-    var weiValue = web3.utils.toWei(amount.toString(), 'ether')
-    contractInstance.methods.buyTokens(user).send({ value: weiValue }, function(err, txHash) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(txHash);
-        }
-    })
+    $('#empty-amount').hide();
+    var tokens_input = $("#amountId").val();
+    var amount = tokens_input*0.0001;
+    if(tokens_input < 100) {
+        $('#empty-amount').show();
+    } else {
+        var weiValue = web3.utils.toWei(amount.toString(), 'ether')
+        contractInstance.methods.buyTokens(user).send({value: weiValue}, function (err, txHash) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(txHash);
+            }
+        })
+    }
 }
 
 var user;
-var tokenAddress = "0x0436e3096e7d32B9759286cCba0edb13F741341E";
-var presaleAddress = "0x897789779Abc968b935055a5D25ED1390Cf2884a";
+var tokenAddress = "0xBb596D48288C33c7A7466dCFdeB267e80B1C9842";
+var contractAddress = "0xB57B9E81e1fBE982c3e323689065eE9D8eA2daf7";
 var accounts;
 var walletDisconnect;
 var tokenSymbol;
@@ -69,7 +75,7 @@ async function fetchAccountData() {
                 tokenInstance = new web3.eth.Contract(data, tokenAddress, { from: accounts[0] });
             });
             await getContractAbi().then(function(data){
-                contractInstance = new web3.eth.Contract(data, presaleAddress, { from: accounts[0] })
+                contractInstance = new web3.eth.Contract(data, contractAddress, { from: accounts[0] })
             });
             user = accounts[0]
             tokenSymbol = await tokenInstance.methods.symbol().call()
@@ -95,19 +101,15 @@ async function fetchAccountData() {
                 $("#TransferEventEmitted").text(owner + " has transferred " + amount + " to " + receipient);
             }).on("error", console.error)
 
-            contractInstance.events.Finalized().on("data", function(event) {
-                $("#finalEventEmitted").show();
-                $("#finalEventEmitted").text("The presale is over");
-            })
-                .on("error", console.error)
             contractInstance.events.TokenPurchase().on("data", function(event) {
+                alert(event);
                 let owner = event.returnValues.purchaser;
                 let price = event.returnValues.value;
                 let priceETH = web3.utils.fromWei(price.toString(), "ether");
                 let amount = event.returnValues.amount;
                 let amountToken = web3.utils.fromWei(amount.toString(), "ether");
                 $("#purchaceEventEmitted").show();
-                $("#purchaceEventEmitted").text("You (" + owner + ") have successfully purchased " + amountToken + " " + tokenSymbol + " for " + priceETH + " BNB");
+                $("#purchaceEventEmitted").text("You (" + owner + ") have successfully purchased " + amountToken + " " + tokenSymbol + " for " + priceETH + " BNB. 10% was locked. First unlock after 60 days.");
             })
                 .on("error", console.error)
         }
@@ -124,6 +126,8 @@ async function fetchAccountData() {
         let tokenBalance = web3.utils.fromWei(tokenBalanceWei.toString(), "ether");
         let lockedBalanceWei = await contractInstance.methods.getLockedTokensCount().call();
         let lockedBalance = web3.utils.fromWei(lockedBalanceWei.toString(), "ether");
+        let claimableBalanceWei = await contractInstance.methods.getClaimableTokensCount().call();
+        let claimableBalance = web3.utils.fromWei(claimableBalanceWei.toString(), "ether");
 
         let amountSold = ethRaised * rate;
         let percentage = (amountSold / presaleSupply) * 100;
@@ -131,13 +135,12 @@ async function fetchAccountData() {
         $("#token-sold").text(amountSold +' '+ tokenSymbol);
         $("#token-balance").text(tokenBalance+' '+tokenSymbol);
         $("#locked-balance").text(lockedBalance+' '+tokenSymbol);
+        $("#claimable-balance").text(claimableBalance+' '+tokenSymbol);
         $("#token-balance-container").show();
         $("#token-sold-container").show();
 
-        let presaleOwner = await contractInstance.methods.owner().call()
-        if (user === presaleOwner) {
-            $("#btn-finalize").show();
-        }
+        if(claimableBalance > 0)
+            $("#claim-tokens").show();
 
     } else {
         onDisconnect()
@@ -206,11 +209,10 @@ async function onDisconnect() {
     $("#buy-tokens").hide();
     $("#token-balance-container").hide();
     $("#token-sold-container").hide();
-    $("#btn-finalize").hide();
 }
 
-async function finalizePresale() {
-    contractInstance.methods.finalize().send({}, function(err, txHash) {
+async function claimTokens() {
+    contractInstance.methods.claimTokens().send({}, function(err, txHash) {
         if (err) {
             console.log(err);
         } else {
@@ -231,9 +233,6 @@ window.addEventListener('load', async() => {
     }
     $("#btn-connect").click(function () {
         onConnect()
-    })
-    $("#btn-finalize").click(function () {
-        finalizePresale()
     })
     $("#btn-disconnect").click(function () {
         onDisconnect()
