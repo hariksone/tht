@@ -36,6 +36,7 @@ contract ThtVesting is Pausable, Ownable {
     struct Order {
         uint256 amount;
         uint256 lockup;
+        uint256 unlocked;
         bool    claimed;
     }
     mapping(address => Order[]) public orders;
@@ -66,28 +67,12 @@ contract ThtVesting is Pausable, Ownable {
         cap = _cap * (10**18);
     }
 
-    /**
-     * event for token purchase logging
-     * @param purchaser who paid for the tokens
-     * @param beneficiary who got the tokens
-     * @param value weis paid for purchase
-     * @param amount amount of tokens purchased
-     */
+
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
     event whiteListedTokenAdded(address _token);
 
     event whiteListedTokenRemoved(address _token);
-
-    function addWhiteListToken(address _token) external onlyOwner {
-        whiteListTokens.add(_token);
-        emit whiteListedTokenAdded(_token);
-    }
-
-    function removeWhiteListToken(address _token) external onlyOwner {
-        whiteListTokens.remove(_token);
-        emit whiteListedTokenRemoved(_token);
-    }
 
     /**
      * Low level token purchase function
@@ -110,6 +95,7 @@ contract ThtVesting is Pausable, Ownable {
         Order memory firstOrder;
         firstOrder.amount = tokensToLock;
         firstOrder.lockup = lockTime;
+        firstOrder.unlocked = lockTime;
         firstOrder.claimed = false;
         orders[msg.sender].push(firstOrder);
         for(uint i=0; i<15; i++) {
@@ -117,6 +103,7 @@ contract ThtVesting is Pausable, Ownable {
             Order memory newOrder;
             newOrder.amount = tokensToLock;
             newOrder.lockup = lockTime;
+            newOrder.unlocked = lockTime;
             newOrder.claimed = false;
             orders[msg.sender].push(newOrder);
         }
@@ -139,8 +126,22 @@ contract ThtVesting is Pausable, Ownable {
         return (notSmallAmount && withinCap);
     }
 
+    function addWhiteListToken(address _token) external onlyOwner {
+        whiteListTokens.add(_token);
+        emit whiteListedTokenAdded(_token);
+    }
+
+    function removeWhiteListToken(address _token) external onlyOwner {
+        whiteListTokens.remove(_token);
+        emit whiteListedTokenRemoved(_token);
+    }
+
     function getOrdersCount() public view returns(uint256) {
         return orders[msg.sender].length;
+    }
+
+    function getOrders() public view returns(Order[] memory) {
+        return orders[msg.sender];
     }
 
     function getLockedTokensCount() public view returns(uint256) {
@@ -167,6 +168,7 @@ contract ThtVesting is Pausable, Ownable {
             if(!orders[msg.sender][i].claimed && orders[msg.sender][i].lockup <= block.timestamp) {
                 tokensCount+=orders[msg.sender][i].amount;
                 orders[msg.sender][i].claimed = true;
+                orders[msg.sender][i].unlocked = block.timestamp;
             }
         }
         if(tokensCount > 0)

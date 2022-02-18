@@ -61,12 +61,29 @@ module.exports = {
         // Useful for deploying to a public network.
         // NB: It's important to wrap the provider as a function.
         bscTestnet: {
+            provider: () => new HDWalletProvider(MNEMONIC, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+            network_id: 97,
+            confirmations: 10,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
+        moralis: {
             provider: () => new HDWalletProvider(MNEMONIC, `https://speedy-nodes-nyc.moralis.io/${PROJECT_ID}/bsc/testnet`),
             network_id: 97, // Ropsten's id
             gas: 5500000, // Ropsten has a lower block limit than mainnet
             confirmations: 10, // # of confs to wait between deployments. (default: 0)
             timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
             skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+            networkCheckTimeout: 10000000,
+        },
+        rinkeby: {
+            provider: () => new HDWalletProvider(MNEMONIC, `https://rinkeby.infura.io/v3/7bff23be6631427093d2be2299cbd8d7`),
+            network_id: 4, // Ropsten's id
+            gas: 5500000, // Ropsten has a lower block limit than mainnet
+            confirmations: 2, // # of confs to wait between deployments. (default: 0)
+            timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+            skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+            networkCheckTimeout: 10000000,
         },
         // Useful for private networks
         // private: {
