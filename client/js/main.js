@@ -1,28 +1,25 @@
 var user;
-var tokenAddress = "0x4C6DD9a8f676828eDfBc06A470524671174666C8";
-var contractAddress = "0xf79C5BD6278479234594b39e821028B76b44e0a1";
+var tokenAddress = "0x0bB362cAaD4ec5a9fc7FE773b61a58942FEaeCB1";
+var contractAddress = "0x59f2dA0C28557BbcA6CCdB0202C43C5fd5aD4910";
 var accounts;
 var walletDisconnect;
 var tokenSymbol;
-
 var web3;
 
 const Web3Modal = window.Web3Modal.default;
 const WalletConnectProvider = window.WalletConnectProvider.default;
 const evmChains = window.evmChains;
 
-let web3Modal;
-let provider;
-
 const tokenABIFile = "abi/token.json";
 const contractABIFile = "abi/contract.json";
 
+let web3Modal;
+let provider;
 let contractABI = {};
 let tokenABI = {};
 
 function init() {
     walletDisconnect = true;
-
     const providerOptions = {
         walletconnect: {
             package: WalletConnectProvider,
@@ -86,6 +83,7 @@ async function fetchAccountData() {
         let lockedBalance = web3.utils.fromWei(lockedBalanceWei.toString(), "ether");
         let claimableBalanceWei = await contractInstance.methods.getClaimableTokensCount().call();
         let claimableBalance = web3.utils.fromWei(claimableBalanceWei.toString(), "ether");
+        let paused = await contractInstance.methods.paused().call();
 
         let amountSold = ethRaised * rate;
         let percentage = (amountSold / presaleSupply) * 100;
@@ -105,14 +103,24 @@ async function fetchAccountData() {
         let isAvailable = await contractInstance.methods.isTokenAvailable(user).call();
         if(!isAvailable) {
             $("#buy-tokens").hide();
-            $(".alert-danger").text('You are not in out white list. Contact us first.').show();
+            $(".alert-danger").text('You are not in white list. Contact us first.').show();
         }
-        let contractOwner = await contractInstance.methods.owner().call()
+        if(paused) {
+            $("#buy-tokens").hide();
+            $(".alert-danger").text('Sale paused').show();
+        }
+        let contractOwner = await contractInstance.methods.owner().call();
         if (user === contractOwner) {
             $("#add-whitelist").show();
             $(".alert-danger").hide();
-        }
 
+            if(!paused) {
+                $('#pauseSale').show();
+            } else {
+                $('#unpauseSale').show();
+            }
+
+        }
         let locked_orders_count = await contractInstance.methods.getOrdersCount().call();
         if(parseInt(locked_orders_count)) {
             let locked_orders = await contractInstance.methods.getOrders().call();
@@ -122,17 +130,13 @@ async function fetchAccountData() {
                 $('#locked-tokens-container').find('tbody').append(
                     '<tr><td>'+parseInt(i+1)+'</td><td>'+web3.utils.fromWei(order.amount, "ether")+'</td><td>'+unlock_date.toLocaleString()+'</td><td>'+order.claimed+'</td></tr>'
                 );
-
             });
             $('#locked-tokens-container').show();
         }
-
     } else {
         onDisconnect()
     }
 }
-
-
 async function fetchBalanceData() {
     web3 = new Web3(provider);
     accounts = await web3.eth.getAccounts();
@@ -298,6 +302,52 @@ async function removeAddress() {
             $('.alert-success').text(data.events.whiteListedTokenRemoved.returnValues._token+' removed from whitelist').show();
         });
     }
+}
+
+async function transferOwnership() {
+    var new_owner = $("#newOwnerAddress").val();
+    if(new_owner) {
+        contractInstance.methods.transferOwnership(new_owner).send({}, function (err, txHash) {
+            if (err) {
+                console.log(err);
+            } else {
+                $('#transferOwner').attr('disabled',true).find('span').show();
+            }
+        }).then((data) => {
+            $('#customerAddress').val('');
+            $('#transferOwner').attr('disabled',false).find('span').hide();
+            $('.alert-success').text('Owner transferred successfully').show();
+        });
+    }
+}
+
+
+async function pauseSale() {
+    contractInstance.methods.pauseSale().send({}, function (err, txHash) {
+        if (err) {
+            console.log(err);
+        } else {
+            $('#pauseSale').attr('disabled',true).find('span').show();
+        }
+    }).then((data) => {
+        $('#pauseSale').attr('disabled',false).find('span').hide();
+        $('#pauseSale').hide();
+        $('.alert-success').text('Paused successfully').show();
+    });
+}
+async function unpauseSale() {
+    contractInstance.methods.unpauseSale().send({}, function (err, txHash) {
+        if (err) {
+            console.log(err);
+        } else {
+            $('#unpauseSale').attr('disabled',true).find('span').show();
+        }
+    }).then((data) => {
+        $('#unpauseSale').attr('disabled',false).find('span').hide();
+        $('#unpauseSale').hide();
+        $('.alert-success').text('Paused successfully').show();
+    });
+
 }
 
 async function buyToken() {

@@ -70,7 +70,7 @@
 
             <div class="card text-center" id="add-whitelist" style="display: none; margin-top:15px;">
                 <div class="card-header">
-                    Add to white list (You are owner)
+                    Owner actions
                 </div>
                 <div class="card-body">
                     <form class="row g-3">
@@ -105,6 +105,37 @@
                             </button>
                         </div>
                     </form>
+
+                    <form class="row g-3">
+                        <div class="col-auto">
+                            <label for="addressLabel3" class="visually-hidden">Address</label>
+                            <input type="text" readonly class="form-control-plaintext" id="addressLabel3" value="Address">
+                        </div>
+                        <div class="col-auto">
+                            <label for="newOwnerAddress" class="visually-hidden">Address</label>
+                            <input type="text" id="newOwnerAddress" class="form-control">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" onclick="transferOwnership();" id="transferOwner" class="btn btn-primary mb-3">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+                                Transfer ownership
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="row">
+                        <div class="col-1">
+                            <button type="button" onclick="pauseSale();" id="pauseSale" style="display: none;" class="btn btn-warning mb-3">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+                                Pause
+                            </button>
+                            <button type="button" onclick="unpauseSale();" id="unpauseSale" style="display: none;" class="btn btn-primary mb-3">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+                                Unpause
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

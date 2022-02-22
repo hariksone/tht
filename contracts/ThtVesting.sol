@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/security/Pausable.sol';
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import '@openzeppelin/contracts/access/Ownable.sol';
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import './ThtToken.sol';
@@ -11,7 +12,7 @@ import './ThtToken.sol';
  * @title ThtVesting
  */
 
-contract ThtVesting is Pausable, Ownable {
+contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -78,7 +79,7 @@ contract ThtVesting is Pausable, Ownable {
      * Low level token purchase function
      * @param beneficiary will receive the tokens.
      */
-    function buyTokens(address beneficiary) public payable whenNotPaused {
+    function buyTokens(address beneficiary) public payable nonReentrant whenNotPaused {
         require(beneficiary != address(0x0));
         require(isTokenAvailable(address(msg.sender)), "WhitelistedTokenSale: _customerToken is not available");
         require(validPurchase());
@@ -184,4 +185,13 @@ contract ThtVesting is Pausable, Ownable {
         bool capReached = (weiRaised * rate >= cap);
         return capReached;
     }
+
+    function pauseSale() public onlyOwner {
+        _pause();
+    }
+
+    function unpauseSale() public onlyOwner {
+        _unpause();
+    }
+
 }
