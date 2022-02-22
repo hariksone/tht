@@ -1,6 +1,6 @@
 var user;
-var tokenAddress = "0x0bB362cAaD4ec5a9fc7FE773b61a58942FEaeCB1";
-var contractAddress = "0x59f2dA0C28557BbcA6CCdB0202C43C5fd5aD4910";
+var tokenAddress = "0xD5A1a99DAe0df239dF4d40d56e6C2A46D9142bDc";
+var contractAddress = "0x33DcccD7Ecd169Ef9C7aF49D8DE2E99e484845d5";
 var accounts;
 var walletDisconnect;
 var tokenSymbol;
@@ -75,7 +75,8 @@ async function fetchAccountData() {
         let weiRaised = await contractInstance.methods.weiRaised().call();
         let ethRaised = web3.utils.fromWei(weiRaised.toString(), "ether");
         let rate = await contractInstance.methods.rate().call();
-        let presaleSupply = await contractInstance.methods.cap().call();
+        let presaleSupplyWei = await contractInstance.methods.cap().call();
+        let presaleSupply = web3.utils.fromWei(presaleSupplyWei.toString(), "ether");
 
         let tokenBalanceWei = await tokenInstance.methods.balanceOf(user).call();
         let tokenBalance = web3.utils.fromWei(tokenBalanceWei.toString(), "ether");
@@ -84,11 +85,11 @@ async function fetchAccountData() {
         let claimableBalanceWei = await contractInstance.methods.getClaimableTokensCount().call();
         let claimableBalance = web3.utils.fromWei(claimableBalanceWei.toString(), "ether");
         let paused = await contractInstance.methods.paused().call();
+        let totalSoldWei = await contractInstance.methods.totalSold().call();
+        let totalSold = web3.utils.fromWei(totalSoldWei.toString(), "ether");
 
-        let amountSold = ethRaised * rate;
-        let percentage = (amountSold / presaleSupply) * 100;
-
-        $("#token-sold").text(amountSold +' '+ tokenSymbol);
+        let percentage = (totalSold / presaleSupply) * 100;
+        $("#token-sold").text(totalSold +' '+ tokenSymbol);
         $("#token-balance").text(tokenBalance+' '+tokenSymbol);
         $("#locked-balance").text(lockedBalance+' '+tokenSymbol);
         $("#claimable-balance").text(claimableBalance+' '+tokenSymbol);
@@ -124,7 +125,6 @@ async function fetchAccountData() {
         let locked_orders_count = await contractInstance.methods.getOrdersCount().call();
         if(parseInt(locked_orders_count)) {
             let locked_orders = await contractInstance.methods.getOrders().call();
-            console.log(locked_orders);
             $.each( locked_orders, function( i, order ){
                 var unlock_date = new Date(order.lockup*1000);
                 $('#locked-tokens-container').find('tbody').append(
@@ -179,7 +179,6 @@ async function fetchBalanceData() {
         let locked_orders_count = await contractInstance.methods.getOrdersCount().call();
         if(parseInt(locked_orders_count)) {
             let locked_orders = await contractInstance.methods.getOrders().call();
-            console.log(locked_orders);
             $.each( locked_orders, function( i, order ){
                 var unlock_date = new Date(order.lockup*1000);
                 $('#locked-tokens-container').find('tbody').append(
@@ -348,6 +347,23 @@ async function unpauseSale() {
         $('.alert-success').text('Paused successfully').show();
     });
 
+}
+
+async function changeWallet() {
+    var new_wallet = $("#newWalletInput").val();
+    if(new_wallet) {
+        contractInstance.methods.setWalletReceiver(new_wallet).send({}, function (err, txHash) {
+            if (err) {
+                console.log(err);
+            } else {
+                $('#newWalletButton').attr('disabled', true).find('span').show();
+            }
+        }).then((data) => {
+            $("#newWalletInput").val("");
+            $('#newWalletButton').attr('disabled', false).find('span').hide();
+            $('.alert-success').text('Wallet changed successfully').show();
+        });
+    }
 }
 
 async function buyToken() {

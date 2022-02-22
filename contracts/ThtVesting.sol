@@ -28,6 +28,8 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
     // cap above which the vesting is ended
     uint256 public cap;
 
+    uint256 public totalSold;
+
     uint256 public minInvestment;
 
     uint256 public rate;
@@ -66,6 +68,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
         rate = _rate;
         minInvestment = _minInvestment;
         cap = _cap * (10**18);
+        totalSold = 0;
     }
 
 
@@ -109,6 +112,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
             orders[msg.sender].push(newOrder);
         }
         IERC20(TokenAddress).transfer(msg.sender, tokensToSend);
+        totalSold += tokens;
         emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
         forwardFunds();
     }
@@ -194,4 +198,8 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
         _unpause();
     }
 
+    function setWalletReceiver(address payable _wallet) external onlyOwner {
+        require(_wallet != address(0x0));
+        wallet = _wallet;
+    }
 }

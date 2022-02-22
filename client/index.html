@@ -85,7 +85,7 @@
                         <div class="col-auto">
                             <button type="button" onclick="addAddress();" id="confirmCustomerAdd" class="btn btn-primary mb-3">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
-                                Confirm and add
+                                Add to whitelist
                             </button>
                         </div>
                     </form>
@@ -101,7 +101,7 @@
                         <div class="col-auto">
                             <button type="button" onclick="removeAddress();" id="confirmCustomerRemove" class="btn btn-danger mb-3">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
-                                Confirm and remove
+                                Remove from whitelist
                             </button>
                         </div>
                     </form>
@@ -119,6 +119,23 @@
                             <button type="button" onclick="transferOwnership();" id="transferOwner" class="btn btn-primary mb-3">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
                                 Transfer ownership
+                            </button>
+                        </div>
+                    </form>
+
+                    <form class="row g-3">
+                        <div class="col-auto">
+                            <label for="addressLabel4" class="visually-hidden">Address</label>
+                            <input type="text" readonly class="form-control-plaintext" id="addressLabel4" value="Address">
+                        </div>
+                        <div class="col-auto">
+                            <label for="newWalletInput" class="visually-hidden">Address</label>
+                            <input type="text" id="newWalletInput" class="form-control">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" onclick="changeWallet();" id="newWalletButton" class="btn btn-primary mb-3">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+                                Change receiver wallet
                             </button>
                         </div>
                     </form>
