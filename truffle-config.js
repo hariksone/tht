@@ -25,6 +25,7 @@ require('dotenv').config();
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 const MNEMONIC = process.env.MNEMONIC;
 const PROJECT_ID = process.env.PROJECT_ID;
+const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
 
 module.exports = {
     /**
@@ -102,6 +103,12 @@ module.exports = {
             //  evmVersion: "byzantium"
             // }
         }
+    },
+
+    plugins: ['truffle-plugin-verify'],
+
+    api_keys: {
+        bscscan: BSCSCAN_API_KEY
     },
 
     // Truffle DB is currently disabled by default; to enable it, change enabled:

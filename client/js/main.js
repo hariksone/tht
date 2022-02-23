@@ -179,6 +179,7 @@ async function fetchBalanceData() {
         let locked_orders_count = await contractInstance.methods.getOrdersCount().call();
         if(parseInt(locked_orders_count)) {
             let locked_orders = await contractInstance.methods.getOrders().call();
+            $('#locked-tokens-container').find('tbody').html();
             $.each( locked_orders, function( i, order ){
                 var unlock_date = new Date(order.lockup*1000);
                 $('#locked-tokens-container').find('tbody').append(
@@ -257,6 +258,7 @@ async function onDisconnect() {
     $("#token-balance-container").hide();
     $("#token-sold-container").hide();
     $('#locked-tokens-container').hide();
+    $('#add-whitelist').hide();
 }
 
 async function claimTokens() {
