@@ -9,10 +9,10 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import './ThtToken.sol';
 
 /**
- * @title ThtVesting
+ * @title ThtSale
  */
 
-contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
+contract ThtSale is ReentrancyGuard, Pausable, Ownable {
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -25,7 +25,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
     // amount of raised money in wei
     uint256 public weiRaised;
 
-    // cap above which the vesting is ended
+    // cap above which the sale is ended
     uint256 public cap;
 
     uint256 public totalSold;
@@ -49,7 +49,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
      * @param _tokenAddress token address
      * @param _wallet who receives invested ether
      * @param _minInvestment is the minimum amount of ether that can be sent to the contract
-     * @param _cap above which the vesting is closed
+     * @param _cap above which the sale is closed
      * @param _rate is the amounts of tokens given for 1 ether
      */
     constructor(
@@ -102,6 +102,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
         firstOrder.unlocked = lockTime;
         firstOrder.claimed = false;
         orders[msg.sender].push(firstOrder);
+        // Create other 16 lock every 30 days
         for(uint i=0; i<15; i++) {
             lockTime = lockTime + 30 days;
             Order memory newOrder;
@@ -184,7 +185,7 @@ contract ThtVesting is ReentrancyGuard, Pausable, Ownable {
         return whiteListTokens.contains(_customerToken);
     }
 
-    //return true if vesting has ended
+    //return true if sale has ended
     function hasEnded() public view returns (bool) {
         bool capReached = (weiRaised * rate >= cap);
         return capReached;

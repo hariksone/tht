@@ -68,13 +68,20 @@ module.exports = {
             timeoutBlocks: 200,
             skipDryRun: true
         },
-        moralis: {
+        bsc: {
+            provider: () => new HDWalletProvider(MNEMONIC, `https://bsc-dataseed1.binance.org`),
+            network_id: 56,
+            confirmations: 10,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
+        ropsten: {
             provider: () => new HDWalletProvider(MNEMONIC, `https://speedy-nodes-nyc.moralis.io/${PROJECT_ID}/bsc/testnet`),
-            network_id: 97, // Ropsten's id
-            gas: 5500000, // Ropsten has a lower block limit than mainnet
-            confirmations: 10, // # of confs to wait between deployments. (default: 0)
-            timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
-            skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+            network_id: 97,
+            gas: 5500000,
+            confirmations: 10,
+            timeoutBlocks: 200,
+            skipDryRun: true,
             networkCheckTimeout: 10000000,
         },
         // Useful for private networks

@@ -1,4 +1,4 @@
-const Vesting = artifacts.require("ThtVesting");
+const Sale = artifacts.require("ThtSale");
 const Token = artifacts.require("ThtToken");
 
 const tokenAddress = false;
@@ -13,9 +13,9 @@ const Web3 = require("web3")
 module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(Token);
     const token = await Token.deployed();
-    await deployer.deploy(Vesting, tokenAddress ? tokenAddress : token.address, accounts[0], minInvestment, tokenCap, rate, {gas: gas, gasPrice: gasPrice });
-    const vesting = await Vesting.deployed();
+    await deployer.deploy(Sale, tokenAddress ? tokenAddress : token.address, accounts[0], minInvestment, tokenCap, rate, {gas: gas, gasPrice: gasPrice });
+    const sale = await Sale.deployed();
 
-    let vestingAmount = Web3.utils.toWei("32000000", "ether")
-    await token.transfer(vesting.address, vestingAmount);
+    let saleAmount = Web3.utils.toWei("32000000", "ether")
+    await token.transfer(sale.address, saleAmount);
 };

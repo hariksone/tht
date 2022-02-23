@@ -25,7 +25,7 @@ function init() {
             package: WalletConnectProvider,
             options: {
                 rpc: {
-                    97: "https://speedy-nodes-nyc.moralis.io/0c0000000000000000/bsc/testnet",
+                    97: "https://data-seed-prebsc-1-s1.binance.org:8545",
                 }
             }
         }
@@ -370,6 +370,7 @@ async function changeWallet() {
 
 async function buyToken() {
     $('.alert').hide();
+    alert(user);
     var tokens_input = $("#amountId").val();
     var amount = tokens_input*0.0001;
     if(tokens_input < 100) {
